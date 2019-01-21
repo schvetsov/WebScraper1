@@ -1,0 +1,66 @@
+Sub lookupNPI()
+
+Dim IE As Object
+Dim ele As Object
+Dim eleM As Object
+Dim eleMN As String
+Dim i As Long, j As Long
+Dim tblTR As Object
+Dim StartTime As Double
+Dim SecondsElapsed As Double
+
+StartTime = Timer
+
+Dim fName As String
+Dim lName As String
+Dim state2 As String
+Dim numRows As Long
+numRows = Sheet3.Cells(Sheet3.Cells.Rows.Count, 1).End(xlUp).Row
+Set xmlHTTP = New MSXML2.ServerXMLHTTP60
+Set htmlBDY = New HTMLDocument
+    
+For i = 1 To numRows
+
+'load variables
+    fName = Sheet3.Range("B" & i).Value2
+    lName = Sheet3.Range("C" & i).Value2
+    state2 = Sheet3.Range("D" & i).Value2
+    
+'adds the name and state to the url
+    sURL = "https://npiregistry.cms.hhs.gov/registry/search-results-table?first_name=" _
+        & fName & "&last_name=" & lName & "&addressType=ANY&state=" & state2
+
+'establish connection with the server
+    With xmlHTTP
+        .Open "GET", sURL, False
+        .setRequestHeader "Content-Type", "text/xml"
+        .send
+        Do While .readyState <> READYSTATE_COMPLETE: DoEvents: Loop
+        htmlBDY.body.innerHTML = .responseText
+    End With
+    
+'walk through the webpage elements to pull the correct NPI
+
+'if there are no search results, then this entry will be skipped
+    If Left(htmlBDY.getElementsByTagName("tbody")(0).getElementsByTagName("tr")(0) _
+        .getElementsByTagName("td")(2).innerText, 5) = "A fed" Then GoTo endThis
+    
+'if there is more than one search result, then this entry will be skipped
+    j = 0
+    For Each ele In htmlBDY.getElementsByTagName("tbody")(0).getElementsByTagName("tr")
+        j = j + 1
+    Next ele
+    If j > 1 Then GoTo endThis
+
+'populate excel spreadsheet with NPI
+    Sheet3.Range("E" & i).Value = htmlBDY.getElementsByTagName("tbody")(0). _
+        getElementsByTagName("tr")(0).getElementsByTagName("td")(0).innerText
+
+    endThis:
+    
+Next i
+    
+SecondsElapsed = Round(Timer - StartTime, 2)
+MsgBox "This code ran successfully in " & SecondsElapsed & " seconds", vbInformation
+    
+End Sub
