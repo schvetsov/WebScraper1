@@ -26,7 +26,7 @@ It will not work in iOS version of Excel due to missing object libraries
   Microsoft Internet Controls
   Microsoft XML v6.0
 4. Copy all the code in the "Main" file of this repository, and paste it into Module 1
-5. Copy the list of license numbers in the "Licenses" file, and paste it in column A beginning in cell A1
+5. Copy the list of license numbers in the "Names" file, and paste it in column A beginning in cell A1
 6. Run the macro, there are several ways to do it:
     - In the VBA edtior with Module 1 window active you can
         - Press F5 to execute all code, or press F8 continuously to step through the code
